@@ -28,6 +28,8 @@ let gridOverlay = viewbox.append("g").attr("id", "gridOverlay");
 let coordinates = viewbox.append("g").attr("id", "coordinates");
 let compass = viewbox.append("g").attr("id", "compass");
 let rivers = viewbox.append("g").attr("id", "rivers");
+let riverLabelRails = defs.append("g").attr("id", "riverLabelRails");
+let riverLabels = viewbox.append("g").attr("id", "riverLabels");
 let terrain = viewbox.append("g").attr("id", "terrain");
 let cults = viewbox.append("g").attr("id", "cults");
 let regions = viewbox.append("g").attr("id", "regions");
@@ -282,6 +284,7 @@ function applyDefaultStyle() {
 
   terrain.attr("opacity", null).attr("filter", null).attr("mask", null);
   rivers.attr("opacity", null).attr("fill", "#5d97bb").attr("filter", null);
+  riverLabels.attr("fill", "#3e3e8b").attr("opacity", 1).attr("font-family", "Almendra SC").attr("data-font", "Almendra+SC").attr("font-size", 2).attr("data-size", 2);
   roads.attr("opacity", .9).attr("stroke", "#d06324").attr("stroke-width", .45).attr("stroke-dasharray", "1.5").attr("stroke-linecap", "butt").attr("filter", null);
   ruler.attr("opacity", null).attr("filter", null);
   searoutes.attr("opacity", .8).attr("stroke", "#ffffff").attr("stroke-width", .45).attr("stroke-dasharray", "1 2").attr("stroke-linecap", "round").attr("filter", null);

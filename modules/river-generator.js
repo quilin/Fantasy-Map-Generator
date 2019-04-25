@@ -102,9 +102,13 @@
       }
 
       rivers.selectAll("path").remove();
+      riverLabelRails.selectAll("path").remove();
+      riverLabels.selectAll("text").remove();
+
       rivers.selectAll("path").data(riverPaths).enter()
         .append("path").attr("d", d => d[1]).attr("id", d => "river"+d[0])
-        .attr("data-width", d => d[2]).attr("data-increment", d => d[3]);
+        .attr("data-width", d => d[2]).attr("data-increment", d => d[3])
+        .each((d, i, nodes) => createLabel(nodes[i]));
     }()
   
     console.timeEnd('generateRivers');
@@ -197,6 +201,55 @@
     let left = lineGen(riverPointsLeft);
     left = left.substring(left.indexOf("C"));
     return round(right + left, 2);
+  }
+
+  const riverLabelPadding = .05;
+  const riverLabelSegment = 150;
+  const minLabelFontSize = 1;
+  const maxLabelFontSize = 3;
+  const getFontSizeFromRatio = function (ratio) {
+    return Math.max(minLabelFontSize, Math.min(ratio * maxLabelFontSize, maxLabelFontSize));
+  }
+
+  const createLabel = function (riverNode) {
+    let segments = [];
+    const l = riverNode.getTotalLength() / 2;
+    const segmentsCount = Math.ceil(l / 10);
+    const increment = rn(l / segmentsCount * 1e5);
+    for (let i = increment * segmentsCount, c = i; i >= 0; i -= increment, c += increment) {
+      const p1 = riverNode.getPointAtLength(i / 1e5);
+      const p2 = riverNode.getPointAtLength(c / 1e5);
+      segments.push([(p1.x + p2.x) / 2, (p1.y + p2.y) / 2]);
+    }
+
+    let railId = "rail-"+riverNode.getAttribute("id");
+    riverLabelRails.append("path")
+      .attr("d", d3.line().curve(d3.curveBasis)(segments))
+      .attr("id", railId)
+      .attr("opacity", 0);
+
+    let railLength = riverNode.getTotalLength();
+    let railSegmentsCount = Math.max(1, Math.floor(railLength / riverLabelSegment));
+    let text = riverLabels.append("text");
+
+    if (railSegmentsCount === 1) {
+      text
+        .attr("text-anchor", "middle")
+        .attr("font-size", getFontSizeFromRatio(railLength / riverLabelSegment));
+      text.append("textPath")
+        .attr("href", "#"+railId)
+        .attr("startOffset", "50%")
+        .text(railId);
+    } else {
+      console.log(`${railId} - segments: ${railSegmentsCount}, length: ${railLength}`);
+      for (let i = 0; i < railSegmentsCount; i++) {
+        text.append("textPath")
+          .attr("href", "#"+railId)
+          .attr("startOffset", (i * riverLabelSegment / railLength + riverLabelPadding) * 100 + "%")
+          .attr("font-size", getFontSizeFromRatio(i + 1 / railSegmentsCount))
+          .text(railId);
+      }
+    }
   }
 
   return {generate, addMeandring, getPath};
